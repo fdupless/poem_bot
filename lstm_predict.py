@@ -8,12 +8,12 @@ c2ndic=np.load('c2n.npy')
 c2ndic=c2ndic[()]
 n2cdic=n2cdic[()]
 
-cha=np.load('poems_input.npy')
-dic=np.unique(cha)
-ohe=np.eye(len(dic))
+#cha=np.load('poems_input.npy')
+#dic=np.unique(cha)
+ohe=np.eye(len(c2ndic))
 
 from keras.models import load_model
-model=load_model('20_epoch_2lstm_256')
+model=load_model('30_epoch_2lstm_256')
 
 
 #seed=dataX_L[5:5+timesteps]
@@ -27,7 +27,7 @@ def sample(a, temperature=1.0):
    return np.argmax(np.random.multinomial(1, a, 1))
 
 timesteps=30
-dataX_L=[ohe[c2ndic[c]] for c in cha[:300]]
+dataX_L=np.load('seed.npy')
 
 def gen_text(n,seed=np.array(dataX_L[5:5+timesteps]),model=model,t=1):
     text=seed
@@ -45,12 +45,15 @@ def gen_text(n,seed=np.array(dataX_L[5:5+timesteps]),model=model,t=1):
         a=a+n2cdic[i]
     return a
 
-def gen_poem(seed=np.array(dataX_L[5:5+timesteps]),model=model,t=1):
+def gen_poem(seed=np.array(dataX_L[5:5+timesteps]),model=model,t=1,nlines=3,randline=False,html=False):
+    if(randline):
+        nlines=np.random.randint(3,10)
+
     newline=0
     seedlength=len(seed)
     text=np.array(np.concatenate((seed,[ohe[c2ndic['\n']]]),axis=0))
     old=c2ndic['p']
-    while(newline<3):
+    while(newline<nlines):
         prear=model.predict(np.reshape(text[-timesteps:],(1,timesteps,len(text[0]))))
         pre=sample(np.reshape(prear,len(prear[0])),temperature=t)
         text=np.concatenate((text,[ohe[pre]]),axis=0)
@@ -63,8 +66,12 @@ def gen_poem(seed=np.array(dataX_L[5:5+timesteps]),model=model,t=1):
         if(t<=0.2):
             if(pre==c2ndic['\n']):
                 newline+=1
-    return ''.join([ n2cdic[np.argmax(c)] for c in list(text[seedlength+1:])])
-print(gen_poem())
+    num2char=n2cdic
+    num2char=n2cdic
+    if(html):
+        num2char[c2ndic['\n']]='</br>'
+    return ''.join([ num2char[np.argmax(c)] for c in list(text[seedlength+1:])])
+#print(gen_poem())
 
 def vts(vec):
     first_sentence=np.array(vec)
