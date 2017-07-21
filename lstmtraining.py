@@ -54,7 +54,10 @@ model.summary()
 
 #from keras.models import load_model
 #tmp=load_model('20_epoch_2lstm_256').get_weights()
+#model.set_weights(tmp)
 
-model.set_weights(tmp)
-model.fit(X,y,epochs=10,batch_size=128)
-model.save('30_epoch_2lstm_256')
+checkpoint = ModelCheckpoint('best_model', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+callbacks_list = [checkpoint]
+
+model.fit(X,y,epochs=10,batch_size=128,callbacks=callbacks_list)
+#model.save('30_epoch_2lstm_256')
