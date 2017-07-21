@@ -49,15 +49,16 @@ model.add(LSTM(firstLSTMoutput, input_shape=(X.shape[1], X.shape[2]),use_bias=Fa
 
 model.add(Dense(X.shape[2], activation='softmax'))
 adam_opt=Adam(lr=0.005, beta_1=0.9, beta_2=0.99, epsilon=1e-08, decay=0.0)
-model.compile(loss='categorical_crossentropy', optimizer=adam_opt)
+model.compile(loss='categorical_crossentropy', optimizer=adam_opt,metrics=['accuracy'])
 model.summary()
 
 #from keras.models import load_model
 #tmp=load_model('20_epoch_2lstm_256').get_weights()
 #model.set_weights(tmp)
 
-checkpoint = ModelCheckpoint('best_model', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+#weights.{epoch:02d}-{val_loss:.2f}.hdf5
+checkpoint = ModelCheckpoint('bestmodel.hdf5', monitor='val_loss', verbose=0, save_best_only=True, mode='min')
 callbacks_list = [checkpoint]
 
-model.fit(X,y,epochs=10,batch_size=128,callbacks=callbacks_list)
+model.fit(X,y,epochs=10,batch_size=128,callbacks=callbacks_list,validation_split=0.1)
 #model.save('30_epoch_2lstm_256')
